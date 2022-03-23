@@ -10,7 +10,7 @@ namespace FrameworkQ.Rules.Lang
     {
         public Operand()
         {
-            
+            PrepareOperations();   
         }
 
         private void PrepareOperations()
@@ -20,6 +20,11 @@ namespace FrameworkQ.Rules.Lang
             _operations["-"] = this.ValidateAndOperate;
             _operations["="] = this.ValidateAndOperate;
             _operations[">"]= this.ValidateAndOperate;
+            _operations[">="] = this.ValidateAndOperate;
+            _operations["<"] = this.ValidateAndOperate;
+            _operations["<="] = this.ValidateAndOperate;
+            _operations["*"]= this.ValidateAndOperate;
+            _operations["/"]= this.ValidateAndOperate;
 
         }
         
@@ -83,23 +88,82 @@ namespace FrameworkQ.Rules.Lang
         }
 
 
-        NumberVariable NumericOperation(Decimal left, Decimal right, string op)
+        Variable NumericOperation(Decimal left, Decimal right, string op)
         {
             NumberVariable ret = new NumberVariable();
             if (op == "+")
             {
                 ret.WriteValue(left + right);
             }
+            if (op == "-")
+            {
+                ret.WriteValue(left - right);
+            }
+            else if (op == "*")
+            {
+                ret.WriteValue(left * right);
+            }
+            else if (op == "/")
+            {
+                ret.WriteValue(left / right);
+            }
+            else if (op == ">")
+            {
+                BoolVariable varRet = new BoolVariable();
+                varRet.WriteValue(left>right);
+                varRet.LockValue();
+                return varRet;
+            }
+            else if (op == ">=")
+            {
+                BoolVariable varRet = new BoolVariable();
+                varRet.WriteValue(left>=right);
+                varRet.LockValue();
+                return varRet;
+            }
+            else if (op == "<")
+            {
+                BoolVariable varRet = new BoolVariable();
+                varRet.WriteValue(left<right);
+                varRet.LockValue();
+                return varRet;
+            }
+            else if (op == "<=")
+            {
+                BoolVariable varRet = new BoolVariable();
+                varRet.WriteValue(left<=right);
+                varRet.LockValue();
+                return varRet;
+            }
+            else if (op == "=")
+            {
+                BoolVariable varRet = new BoolVariable();
+                varRet.WriteValue(left.Equals(right) );
+                varRet.LockValue();
+                return varRet;
+            }
+            else
+            {
+                throw new InvalidOperationException(op + " cannot be used between to numeric variables");
+            }
+
             ret.LockValue();
             return ret;
         }
         
-        StringVariable StringOperation(String left, String right, string op)
+        Variable StringOperation(String left, String right, string op)
         {
             StringVariable ret = new StringVariable();
             if (op == "+")
             {
                 ret.WriteValue(left + right);
+            }
+            else if (op == "=")
+            {
+                BoolVariable varRet = new BoolVariable();
+                varRet.WriteValue(left.Equals(right) );
+                varRet.LockValue();
+                return varRet;
             }
             ret.LockValue();
             return ret;
