@@ -50,43 +50,45 @@ namespace FrameworkQ.Rules.Lang
         private Dictionary<string, ResolveDelegate> _operations = null;
         
 
-        private string _operator = string.Empty;
         public string Operator { get; set; }
         
         public override Variable Resolve()
         {
-            if (_operations.ContainsKey(_operator))
+            if (_operations.ContainsKey(this.Operator))
             {
-                return _operations[_operator].Invoke(this.LeftExpression, this.RightExpression, _operator);
+                return _operations[this.Operator].Invoke(this.LeftExpression, this.RightExpression, this.Operator);
             }
             else
             {
                 throw new InvalidOperationException("Invalid op code in expression");
             }
+            throw new InvalidOperationException("Invalid op code in expression");
         }
 
         #region Operations
-        
+
         Variable ValidateAndOperate(IExpression left, IExpression right, string op)
         {
             Variable leftResult = left.Resolve();
             Variable rightResult = right.Resolve();
-            
+
             if (leftResult.IsNumeric() && rightResult.IsNumeric())
             {
-                NumericOperation((decimal) leftResult.ReadValue(), (decimal) rightResult.ReadValue(), op);
+                return NumericOperation((decimal)leftResult.ReadValue(), (decimal)rightResult.ReadValue(), op);
             }
-
-            if (leftResult.ReadValue().GetType().Equals( rightResult.ReadValue().GetType()))
+            else if (leftResult.ReadValue().GetType().Equals(rightResult.ReadValue().GetType()))
             {
                 if (leftResult.ReadValue().GetType() == typeof(StringVariable))
                 {
-                    StringOperation( leftResult.ReadValue().ToString(),  rightResult.ReadValue().ToString(), op);
+                    return StringOperation(leftResult.ReadValue().ToString(), rightResult.ReadValue().ToString(), op);
                 }
+            }
+            else
+            {
+                throw new InvalidOperationException("Trying to add different variable types will not work.");
             }
             throw new InvalidOperationException("Trying to add different variable types will not work.");
         }
-
 
         Variable NumericOperation(Decimal left, Decimal right, string op)
         {
@@ -95,7 +97,7 @@ namespace FrameworkQ.Rules.Lang
             {
                 ret.WriteValue(left + right);
             }
-            if (op == "-")
+            else if (op == "-")
             {
                 ret.WriteValue(left - right);
             }
@@ -144,7 +146,7 @@ namespace FrameworkQ.Rules.Lang
             }
             else
             {
-                throw new InvalidOperationException(op + " cannot be used between to numeric variables");
+                throw new InvalidOperationException(op + " cannot be used between two numeric variables");
             }
 
             ret.LockValue();
